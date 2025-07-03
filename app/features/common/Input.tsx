@@ -9,6 +9,11 @@ const Input = styled(TextField)`
   }
   & > input {
     font-size: 14px;
+
+    &::placeholder {
+      color: ${({ theme }) => theme.materialTextDisabled};
+      opacity: 1;
+    }
   }
 `;
 

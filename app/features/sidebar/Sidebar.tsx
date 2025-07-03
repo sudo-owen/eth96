@@ -25,7 +25,8 @@ const ContractsSection = styled.div`
 
 const FilesCutout = styled(Cutout)`
   flex-grow: 1;
-  background: white;
+  background: ${({ theme }) => theme.canvas};
+  color: ${({ theme }) => theme.materialText};
   overflow: hidden;
   padding-bottom: 35px;
 

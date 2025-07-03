@@ -8,7 +8,8 @@ const FunctionsCutout = styled(Cutout)`
   width: 300px;
   flex-grow: 1;
   text-align: left;
-  background: white;
+  background: ${({ theme }) => theme.canvas};
+  color: ${({ theme }) => theme.materialText};
   overflow: hidden;
   font-family: monospace;
 

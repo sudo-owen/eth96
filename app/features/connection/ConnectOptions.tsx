@@ -12,7 +12,7 @@ import ByCustomNode from "./ByCustomNode";
 
 const ConnectOptions = () => {
   const { connection, setConnection } = Connection.useContainer();
-  const onChange = (e) => setConnection(e.target.value);
+  const onChange = (selectedOption) => setConnection(selectedOption.value);
   return (
     <>
       <Fieldset

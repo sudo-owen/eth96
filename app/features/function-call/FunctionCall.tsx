@@ -26,6 +26,11 @@ const Content = styled.div`
   overflow-x: hidden;
 `;
 
+const TypePrefix = styled.span`
+  color: ${({ theme }) => theme.materialTextDisabled};
+  font-size: 12px;
+`;
+
 const GasLimitCheckbox = styled(Checkbox)`
   margin-left: 12px;
 
@@ -101,9 +106,9 @@ const FunctionForm = ({ fn }) => {
               <div>
                 {input.isComponent ? (
                   <>
-                    <span style={{ color: '#666', fontSize: '12px' }}>
+                    <TypePrefix>
                       {input.parentName}.
-                    </span>
+                    </TypePrefix>
                     {input.name}
                   </>
                 ) : (

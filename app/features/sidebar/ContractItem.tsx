@@ -8,8 +8,8 @@ interface IProps {
 
 const Item = styled.div`
   height: 24px;
-  color: ${(p: IProps) => (p.isActive ? "white" : "unset")};
-  background: ${(p: IProps) => (p.isActive ? "#050289" : "unset")};
+  color: ${(p: IProps) => (p.isActive ? p.theme.canvasTextInvert : p.theme.materialText)};
+  background: ${(p: IProps) => (p.isActive ? p.theme.hoverBackground : "unset")};
   border: ${(p: IProps) => (p.isActive ? "1px dotted" : "unset")};
   cursor: default;
   padding: 2px 4px;

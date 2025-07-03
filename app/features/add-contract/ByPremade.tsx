@@ -22,7 +22,8 @@ const ListsContainer = styled.div`
 const VendorCutout = styled(Cutout)`
   flex-grow: 1;
   text-align: left;
-  background: white;
+  background: ${({ theme }) => theme.canvas};
+  color: ${({ theme }) => theme.materialText};
   overflow: hidden;
 
   &:before {

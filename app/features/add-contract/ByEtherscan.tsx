@@ -54,7 +54,7 @@ const ByEtherscan = ({ closeModal }) => {
               native
               value={network}
               options={networkOptions}
-              onChange={(e) => setNetwork(e.target.value)}
+              onChange={(selectedOption) => setNetwork(selectedOption.value)}
               width="100%"
               className="connect-options"
             />

@@ -33,3 +33,9 @@ body {
 li {
   margin-bottom: 0.5rem;
 }
+
+/* Placeholder text styling for better dark mode contrast */
+input::placeholder,
+textarea::placeholder {
+  opacity: 0.7;
+}
