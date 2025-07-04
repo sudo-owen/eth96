@@ -12,7 +12,8 @@ export function useAddress() {
       return setAddress(null);
     }
 
-    signer.getAddress().then((address) => setAddress(address));
+    // In viem, Account objects have an address property directly
+    setAddress(signer.address);
   }, [internalSigner, customSigner]);
 
   return {

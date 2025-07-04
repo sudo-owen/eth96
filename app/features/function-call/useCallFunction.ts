@@ -1,36 +1,50 @@
-import { ethers } from "ethers";
+import {
+  getContract,
+  decodeEventLog,
+  parseAbi
+} from "viem";
 
 import OutputLog from "../../containers/OutputLog";
 import ContractAddress from "../../containers/ContractAddress";
 import Contracts from "../../containers/Contracts";
 import Signers from "../../containers/Signers";
+import Connection from "../../containers/Connection";
 
-const useCallFunction = (args, types, fn, opts) => {
+const useCallFunction = (args: any[], types: string[], fn: any, opts: any) => {
   const { addLogItem, addJSONLogItem } = OutputLog.useContainer();
   const { selectedContract } = Contracts.useContainer();
   const { address } = ContractAddress.useContainer();
-  const { signer } = Signers.useContainer();
+  const { signer, customWalletClient } = Signers.useContainer();
+  const { publicClient, walletClient } = Connection.useContainer();
 
-  const logEvents = async (tx) => {
-    const receipt = await signer.provider.getTransactionReceipt(tx.hash);
-    const contractInterface = new ethers.Interface(selectedContract.abi);
+  const logEvents = async (txHash: string) => {
+    if (!publicClient || !selectedContract) return;
+
+    const receipt = await publicClient.getTransactionReceipt({ hash: txHash as `0x${string}` });
+    const abi = parseAbi(selectedContract.abi.map((item: any) => {
+      if (item.type === 'event') {
+        return `event ${item.name}(${item.inputs.map((input: any) => `${input.type} ${input.name}`).join(', ')})`;
+      }
+      return '';
+    }).filter(Boolean));
 
     receipt.logs.forEach((log) => {
       try {
-        const decoded = contractInterface.parseLog({
+        const decoded = decodeEventLog({
+          abi,
+          data: log.data,
           topics: log.topics,
-          data: log.data
         });
 
         if (decoded) {
-          const values = decoded.args.map((value, index) => {
+          const values = Object.values(decoded.args || {}).map((value) => {
             // Convert BigInt values to string for display
             if (typeof value === 'bigint') {
               return value.toString();
             }
             return value;
           });
-          addLogItem(`Event: ${decoded.name}(${values.join(', ')})`);
+          addLogItem(`Event: ${decoded.eventName}(${values.join(', ')})`);
         }
       } catch (error) {
         // Log couldn't be decoded with this contract's ABI, skip it
@@ -40,8 +54,13 @@ const useCallFunction = (args, types, fn, opts) => {
   };
 
   const callFunction = async () => {
+    if (!selectedContract || !address) {
+      addLogItem("Error: No contract selected or address provided");
+      return;
+    }
+
     // handle array, int, and tuple types
-    const processedArgs = args.map((arg, idx) => {
+    const processedArgs = args.map((arg: any, idx: number) => {
       const type = types[idx];
       if (type.slice(-2) === "[]") return JSON.parse(arg);
       if (type.substring(0, 4) === "uint") return BigInt(arg);
@@ -64,18 +83,43 @@ const useCallFunction = (args, types, fn, opts) => {
       return arg;
     });
 
-    const instance = new ethers.Contract(address, selectedContract.abi, signer);
+    // Get the appropriate client for the operation
+    const activeWalletClient = customWalletClient || walletClient;
 
     if (fn.stateMutability !== "view" && fn.constant !== true) {
-      // mutating fn; just return hash
-      const tx = await instance[fn.name](...processedArgs, opts);
-      addLogItem(`tx.hash: ${tx.hash}`);
-      await tx.wait();
-      addLogItem(`tx mined: ${tx.hash}`);
-      await logEvents(tx);
+      // mutating fn; requires wallet client
+      if (!activeWalletClient || !signer || !publicClient) {
+        addLogItem("Error: No wallet client available for transaction");
+        return;
+      }
+
+      const contract = getContract({
+        address: address as `0x${string}`,
+        abi: selectedContract.abi,
+        client: activeWalletClient,
+      });
+
+      const txHash = await (contract.write as any)[fn.name](...processedArgs, opts);
+      addLogItem(`tx.hash: ${txHash}`);
+
+      // Wait for transaction receipt
+      await publicClient.waitForTransactionReceipt({ hash: txHash });
+      addLogItem(`tx mined: ${txHash}`);
+      await logEvents(txHash);
     } else {
-      // view fn
-      const result = await instance[fn.name](...processedArgs);
+      // view fn; can use public client
+      if (!publicClient) {
+        addLogItem("Error: No public client available for read operation");
+        return;
+      }
+
+      const contract = getContract({
+        address: address as `0x${string}`,
+        abi: selectedContract.abi,
+        client: publicClient,
+      });
+
+      const result = await (contract.read as any)[fn.name](...processedArgs);
 
       // simple return type
       if (!Array.isArray(result)) {
@@ -84,10 +128,10 @@ const useCallFunction = (args, types, fn, opts) => {
       }
 
       // complex return type
-      const processArray = (arr) => {
+      const processArray = (arr: any[]): any[] => {
         let newArr = [];
         for (let i = 0; i < arr.length; i++) {
-          const val = Array.isArray(arr[i])
+          const val: any = Array.isArray(arr[i])
             ? processArray(arr[i])
             : arr[i].toString();
           newArr.push(val);

@@ -11,7 +11,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "ethers": "^6.15.0",
     "query-string": "^9.2.1",
     "random-words": "^2.0.1",
     "react": "^18.3.1",
@@ -19,7 +18,8 @@
     "react-modal": "^3.16.3",
     "react95": "^4.0.0",
     "styled-components": "^6.1.19",
-    "unstated-next": "^1.1.0"
+    "unstated-next": "^1.1.0",
+    "viem": "^2.31.7"
   },
   "devDependencies": {
     "@types/react": "^18.3.23",

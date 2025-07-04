@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Button, TabBody as rTabBody, TextField, Fieldset } from "react95";
 import validateRawArtifact from "../common/validateRawArtifact";
 import Contracts from "../../containers/Contracts";
+import Input from "../common/Input";
 
 const TabBody = styled(rTabBody)`
   width: 100%;
@@ -12,6 +13,18 @@ const TabBody = styled(rTabBody)`
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
+`;
+
+const StyledTextField = styled(TextField)`
+  & > textarea {
+    color: ${({ theme }) => theme.materialText};
+    font-family: monospace;
+
+    &::placeholder {
+      color: ${({ theme }) => theme.materialTextDisabled};
+      opacity: 1;
+    }
+  }
 `;
 
 const ByAbi = ({ closeModal }) => {
@@ -40,11 +53,11 @@ const ByAbi = ({ closeModal }) => {
           as a result of compiling Ethereum smart contracts.
         </p>
         <br />
-        <TextField
+        <StyledTextField
           placeholder="Paste JSON artifact here..."
           onChange={handleTextAreaChange}
           multiline
-          style={{ height: `240px`, fontFamily: "monospace" }}
+          style={{ height: `240px` }}
         />
         <br />
         <Fieldset label="Name (required):">
@@ -53,7 +66,7 @@ const ByAbi = ({ closeModal }) => {
             infer this from your JSON artifact but you are welcome to change it.
           </p>
           <br />
-          <TextField
+          <Input
             placeholder="MyDapp"
             value={name}
             onChange={(e) => setName(e.target.value)}

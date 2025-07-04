@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Modal from "react-modal";
 import { Button } from "react95";
 
@@ -27,7 +27,14 @@ const customStyles = {
   },
 };
 
-const EncodeButton = ({ args, types, inputs, opts }) => {
+interface EncodeButtonProps {
+  args: any[];
+  types: string[];
+  inputs: any[];
+  opts: any;
+}
+
+const EncodeButton: React.FC<EncodeButtonProps> = ({ args, types, inputs, opts }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);

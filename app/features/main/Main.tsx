@@ -1,4 +1,3 @@
-import React from "react";
 import { useEffect } from "react";
 import styled from "styled-components";
 import { Fieldset, Panel } from "react95";
@@ -7,7 +6,6 @@ import Contracts from "../../containers/Contracts";
 import FunctionInfo from "../function-info/FunctionInfo";
 import OutputLog from "../output-log/OutputLog";
 import AddressInfo from "../address-info/AddressInfo";
-import useQueryStringContract from "./useQueryStringContract";
 
 const Container = styled.div`
   flex-grow: 1;
@@ -42,7 +40,6 @@ const FooterPanel = styled(Panel)`
 const Main = () => {
   const { selectedContract: contract, overwriteContract } =
     Contracts.useContainer();
-  useQueryStringContract();
 
   useEffect(() => {
     const contracts = localStorage.getItem("contracts");

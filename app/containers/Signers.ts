@@ -1,26 +1,44 @@
 import { createContainer } from "unstated-next";
 import { useState, useEffect } from "react";
-import { ethers, Signer, Wallet } from "ethers";
+import {
+  Account,
+  WalletClient,
+  createWalletClient,
+  custom,
+  http
+} from "viem";
+import { privateKeyToAccount, mnemonicToAccount } from "viem/accounts";
+import { mainnet } from "viem/chains";
 import Connection from "./Connection";
 
 const useSigners = () => {
-  const { provider } = Connection.useContainer();
-  const [internalSigner, setInternalSigner] = useState<Signer | null>(null);
-  const [customSigner, setCustomSigner] = useState<Wallet | null>(null);
+  const { publicClient, walletClient } = Connection.useContainer();
+  const [internalAccount, setInternalAccount] = useState<Account | null>(null);
+  const [customAccount, setCustomAccount] = useState<Account | null>(null);
+  const [customWalletClient, setCustomWalletClient] = useState<WalletClient | null>(null);
 
   const attemptSetCustomSigner = (customSignerString: string) => {
-    let mySigner: Wallet;
     try {
       if (customSignerString.trim() !== "") {
+        let account: Account;
+
         if (customSignerString.substring(0, 2) === "0x") {
           // private key
-          mySigner = new Wallet(customSignerString.trim());
+          account = privateKeyToAccount(customSignerString.trim() as `0x${string}`);
         } else {
           // mnemonic
-          mySigner = Wallet.fromPhrase(customSignerString.trim());
+          account = mnemonicToAccount(customSignerString.trim());
         }
-        mySigner = mySigner.connect(provider);
-        setCustomSigner(mySigner);
+
+        // Create a wallet client for this custom account
+        const walletClient = createWalletClient({
+          account,
+          chain: mainnet, // Default to mainnet, will be updated based on actual network
+          transport: publicClient ? custom(window.ethereum) : http("http://localhost:8545"),
+        });
+
+        setCustomAccount(account);
+        setCustomWalletClient(walletClient);
       }
     } catch (error) {
       console.error(error);
@@ -28,32 +46,42 @@ const useSigners = () => {
     }
   };
 
-  const testAndSetSigner = async (signer: Signer) => {
+  const testAndSetAccount = async (walletClient: WalletClient) => {
     try {
-      await signer.getAddress();
-      setInternalSigner(signer);
+      const accounts = await walletClient.getAddresses();
+      if (accounts.length > 0) {
+        const account = { address: accounts[0] } as Account;
+        setInternalAccount(account);
+      }
     } catch (error) {
       console.error(error);
-      setInternalSigner(null);
+      setInternalAccount(null);
     }
   };
 
   useEffect(() => {
-    setInternalSigner(null);
-    if (provider) {
-      const signer = provider.getSigner();
-      testAndSetSigner(signer);
+    setInternalAccount(null);
+    if (walletClient) {
+      testAndSetAccount(walletClient);
     }
-  }, [provider]);
+  }, [walletClient]);
 
   return {
-    internalSigner,
-    setInternalSigner,
-    customSigner,
-    setCustomSigner,
+    internalAccount,
+    setInternalAccount,
+    customAccount,
+    setCustomAccount,
+    customWalletClient,
+    setCustomWalletClient,
     attemptSetCustomSigner,
-    testAndSetSigner,
-    signer: customSigner || internalSigner,
+    testAndSetAccount,
+    // Legacy interface for backward compatibility during migration
+    internalSigner: internalAccount,
+    setInternalSigner: setInternalAccount,
+    customSigner: customAccount,
+    setCustomSigner: setCustomAccount,
+    testAndSetSigner: testAndSetAccount,
+    signer: customAccount || internalAccount,
   };
 };
 

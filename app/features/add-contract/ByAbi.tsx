@@ -4,6 +4,7 @@ import { Button, TabBody as rTabBody, TextField, Fieldset } from "react95";
 import { generate as randomWords } from "random-words";
 import validateAbi from "../common/validateAbi";
 import Contracts from "../../containers/Contracts";
+import Input from "../common/Input";
 
 const TabBody = styled(rTabBody)`
   width: 100%;
@@ -13,6 +14,18 @@ const TabBody = styled(rTabBody)`
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
+`;
+
+const StyledTextField = styled(TextField)`
+  & > textarea {
+    color: ${({ theme }) => theme.materialText};
+    font-family: monospace;
+
+    &::placeholder {
+      color: ${({ theme }) => theme.materialTextDisabled};
+      opacity: 1;
+    }
+  }
 `;
 
 const generateName = () => {
@@ -41,13 +54,13 @@ const ByAbi = ({ closeModal }) => {
           specify how to interact with Ethereum smart contracts.
         </p>
         <br />
-        <TextField
+        <StyledTextField
           placeholder="Paste ABI here..."
           onChange={(e) => {
             setRawAbi(e.target.value);
           }}
           multiline
-          style={{ height: `240px`, fontFamily: "monospace" }}
+          style={{ height: `240px` }}
         />
         <br />
         <Fieldset label="Name (required):">
@@ -56,7 +69,7 @@ const ByAbi = ({ closeModal }) => {
             name is generated for your convenience.
           </p>
           <br />
-          <TextField
+          <Input
             placeholder="MyDapp"
             value={name}
             onChange={(e) => setName(e.target.value)}

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { useState, useEffect } from "react";
+import { parseEther } from "viem";
 import styled from "styled-components";
 import { Fieldset, Button, Checkbox } from "react95";
 
@@ -46,7 +46,11 @@ const GasLimitCheckbox = styled(Checkbox)`
   }
 `;
 
-const FunctionForm = ({ fn }) => {
+interface FunctionFormProps {
+  fn: any;
+}
+
+const FunctionForm: React.FC<FunctionFormProps> = ({ fn }) => {
   const { addLogItem } = OutputLog.useContainer();
   const [formState, setFormState] = useState({});
   const [ethToSend, setEthToSend] = useState("");
@@ -58,7 +62,7 @@ const FunctionForm = ({ fn }) => {
 
   // set options for transaction
   const opts: any = {};
-  if (ethToSend !== "") opts.value = ethers.utils.parseEther(ethToSend);
+  if (ethToSend !== "") opts.value = parseEther(ethToSend);
   if (gasLimit !== "" && showGasLimit) opts.gasLimit = parseInt(gasLimit);
 
   // get the function to call when user hits submit
@@ -77,14 +81,14 @@ const FunctionForm = ({ fn }) => {
     );
   }
 
-  const handleInputChange = (key, value) => {
+  const handleInputChange = (key: string, value: string) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSubmit = async () => {
     try {
       await callFunction();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       addLogItem(`Error: ${error.message}`);
     }
@@ -124,7 +128,7 @@ const FunctionForm = ({ fn }) => {
                 }
                 placeholder={input.type}
                 value={formState[inputKey] || ""}
-                onChange={(e) => handleInputChange(inputKey, e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(inputKey, e.target.value)}
                 className="function-form-item"
               />
             </div>
@@ -137,7 +141,7 @@ const FunctionForm = ({ fn }) => {
               type="number"
               placeholder="in units of Ethers, not Wei"
               value={ethToSend}
-              onChange={(e) => setEthToSend(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEthToSend(e.target.value)}
               style={{ marginBottom: `1rem` }}
             />
           </>
@@ -167,7 +171,7 @@ const FunctionForm = ({ fn }) => {
               type="number"
               placeholder="leave blank to use default"
               value={gasLimit}
-              onChange={(e) => setGasLimit(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGasLimit(e.target.value)}
               style={{ marginBottom: `1rem` }}
             />
           </>

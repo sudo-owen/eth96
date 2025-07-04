@@ -1,10 +1,10 @@
 // Utility functions for handling tuple structures
-export const flattenInputs = (inputs) => {
-  const flattened = [];
+export const flattenInputs = (inputs: any[]) => {
+  const flattened: any[] = [];
 
-  inputs.forEach((input, idx) => {
+  inputs.forEach((input: any, idx: number) => {
     if (input.type === 'tuple' && input.components) {
-      input.components.forEach((component, compIdx) => {
+      input.components.forEach((component: any, compIdx: number) => {
         flattened.push({
           ...component,
           parentIndex: idx,
@@ -28,14 +28,14 @@ export const flattenInputs = (inputs) => {
   return flattened;
 };
 
-export const reconstructTupleArgs = (inputs, formState) => {
-  const args = [];
-  const types = [];
+export const reconstructTupleArgs = (inputs: any[], formState: any) => {
+  const args: any[] = [];
+  const types: string[] = [];
 
-  inputs.forEach((input, idx) => {
+  inputs.forEach((input: any, idx: number) => {
     if (input.type === 'tuple' && input.components) {
       // Reconstruct tuple from individual component values
-      const tupleValue = input.components.map((component, compIdx) => {
+      const tupleValue = input.components.map((component: any, compIdx: number) => {
         const value = formState[`${idx}.${compIdx}`];
         return value || '';
       });
@@ -50,7 +50,7 @@ export const reconstructTupleArgs = (inputs, formState) => {
   return { args, types };
 };
 
-const useFormData = (fn, formState) => {
+const useFormData = (fn: any, formState: any) => {
   if (!fn) {
     return { args: [], types: [], flattenedInputs: [] };
   }
